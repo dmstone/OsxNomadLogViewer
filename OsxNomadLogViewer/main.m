@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import "receivethread.h"
+#import "transmitthread.h"
 
 
 const char * ipAddress;
@@ -23,7 +24,12 @@ int main(int argc, const char * argv[]) {
         
         parseCmdLine(argc, argv);
         [receiveThread start];
+        [transmitThread start];
         
+        [transmitThread send:0 :"192.168.1.4"];
+        
+        [transmitThread stop];
+        [transmitThread stop];
     }
     return 0;
 }

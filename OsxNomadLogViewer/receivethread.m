@@ -11,25 +11,36 @@
 
 @implementation receiveThread
 
-bool running = false;
+// these are globals
+bool receivethread_running = false;
+bool receivethread_stopThread = false;
+NSThread * receivethread_Thread;
+
 +(void) start {
     NSLog(@"start entry");
-    running =  false;
-    rxThread = [[NSThread alloc] initWithTarget:self selector:@selector(rxThread:)  object:nil];
-    [rxThread start];
-    while (running == false) {
+    receivethread_running =  false;
+    receivethread_stopThread = false;
+    
+    receivethread_Thread = [[NSThread alloc] initWithTarget:self selector:@selector(rxThread:)  object:nil];
+    [receivethread_Thread start];
+    while (receivethread_running == false) {
         sleep(1);
     }
     NSLog(@"start exit");
 }
 
 +(void) stop {
-    
+    receivethread_stopThread = true;
 }
 
 +(void) rxThread:(id) param {
     NSLog(@"rxThread entry");
-    running = true;
+    receivethread_running = true;
+    
+    while ( ! receivethread_stopThread) {
+        sleep(1);
+    }
+    NSLog(@"rxThread exit");
 }
 
 @end

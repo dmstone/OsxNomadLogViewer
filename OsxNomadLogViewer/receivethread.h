@@ -9,7 +9,6 @@
 #ifndef receivethread_h
 #define receivethread_h
 
-static NSThread * rxThread;
 
 @interface receiveThread : NSObject {
 }
