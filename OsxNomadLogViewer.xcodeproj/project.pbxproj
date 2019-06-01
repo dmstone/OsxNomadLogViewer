@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		79893A44229CBFE6003ED7EC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 79893A43229CBFE6003ED7EC /* main.m */; };
+		79893A4B22A30676003ED7EC /* receivethread.m in Sources */ = {isa = PBXBuildFile; fileRef = 79893A4A22A30676003ED7EC /* receivethread.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,8 @@
 /* Begin PBXFileReference section */
 		79893A40229CBFE6003ED7EC /* OsxNomadLogViewer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OsxNomadLogViewer; sourceTree = BUILT_PRODUCTS_DIR; };
 		79893A43229CBFE6003ED7EC /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		79893A4A22A30676003ED7EC /* receivethread.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = receivethread.m; sourceTree = "<group>"; };
+		79893A4C22A306AB003ED7EC /* receivethread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = receivethread.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +61,8 @@
 			isa = PBXGroup;
 			children = (
 				79893A43229CBFE6003ED7EC /* main.m */,
+				79893A4A22A30676003ED7EC /* receivethread.m */,
+				79893A4C22A306AB003ED7EC /* receivethread.h */,
 			);
 			path = OsxNomadLogViewer;
 			sourceTree = "<group>";
@@ -119,6 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				79893A44229CBFE6003ED7EC /* main.m in Sources */,
+				79893A4B22A30676003ED7EC /* receivethread.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
