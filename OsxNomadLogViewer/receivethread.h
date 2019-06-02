@@ -13,9 +13,10 @@
 @interface receiveThread : NSObject {
 }
 
-+(void) start;
++(void) start:(char *)addr :(int)port;
 +(void) stop;
 +(void) rxThread:(id)param;
++(void) receivePacket :(char *) sendAddr  :(void **) oBuffer :(int *) oLength;
 
 @end
 

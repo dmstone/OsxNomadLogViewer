@@ -20,6 +20,7 @@ bool transmitthread_running = false;
 bool transmitthread_stopThread = false;
 int transmitthread_cmd = -1;;
 char * transmitthread_ipaddr;
+int transmitthread_port;
 
 NSThread * transmitthread_Thread;
 
@@ -42,9 +43,10 @@ NSThread * transmitthread_Thread;
     }
 }
 
-+(void) send :(int)cmd :(char *)addr {
++(void) send :(int)cmd :(char *)addr :(int)port {
     transmitthread_ipaddr = addr;
     transmitthread_cmd = cmd;
+    transmitthread_port=port;
     while (transmitthread_cmd != -1) {
         sleep(1);
     }
@@ -84,7 +86,7 @@ NSThread * transmitthread_Thread;
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof addr);
     inet_pton(AF_INET, (char *) sendAddr, &addr.sin_addr);
-    addr.sin_port = htons(8083);
+    addr.sin_port = htons(transmitthread_port);
     
     char * buffer = "crossmatc ";
     int ret = (int) sendto(sd, buffer, strlen(buffer), 0 , (struct sockaddr *) &addr, sizeof addr);

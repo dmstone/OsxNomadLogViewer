@@ -15,7 +15,7 @@
 +(void) start;
 +(void) stop;
 +(void) txThread :(id)param;
-+(void) send :(int)cmd :(char *)addr;
++(void) send :(int)cmd :(char *)addr :(int)port;
 +(void) sendRequest: (char *)sendAddr;
 
 @end

@@ -13,7 +13,8 @@
 #import "transmitthread.h"
 
 
-const char * ipAddress;
+const char * ipAddress = "192.168.128.1";
+int port = 8087;
 NSThread* receiveThreadNs;
 
 void parseCmdLine(int argc, const char * argv[]);
@@ -23,10 +24,10 @@ int main(int argc, const char * argv[]) {
         // insert code here...
         
         parseCmdLine(argc, argv);
-        [receiveThread start];
+        [receiveThread start:(char *)ipAddress :port];
         [transmitThread start];
         
-        [transmitThread send:0 :"192.168.1.4"];
+        [transmitThread send:0 :(char *)ipAddress :port];
         
         [transmitThread stop];
         [transmitThread stop];
