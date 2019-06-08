@@ -10,27 +10,25 @@
 
 #import <Foundation/Foundation.h>
 #import "receivethread.h"
-#import "transmitthread.h"
 
 
-const char * ipAddress = "192.168.128.1";
+
+const char * ipAddress = "192.168.1.4";
 int port = 8087;
 NSThread* receiveThreadNs;
+
+receiveThread * receive;
 
 void parseCmdLine(int argc, const char * argv[]);
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        // insert code here...
         
         parseCmdLine(argc, argv);
-        [receiveThread start:(char *)ipAddress :port];
-        [transmitThread start];
         
-        [transmitThread send:0 :(char *)ipAddress :port];
+        receive = [[receiveThread alloc] init];
         
-        [transmitThread stop];
-        [transmitThread stop];
+        [receive start:(char *)ipAddress :port];
     }
     return 0;
 }

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+
 #import "receivethread.h"
 
 #include <netinet/in.h>
@@ -16,97 +17,128 @@
 
 @implementation receiveThread
 
-// these are globals
-bool receivethread_running = false;
-bool receivethread_stopThread = false;
-NSThread * receivethread_Thread;
-char * receivethread_ipaddr;
-int receivethread_port;
 
-+(void) start :(char *)addr :(int)port {
-    NSLog(@"start entry");
-    receivethread_running =  false;
-    receivethread_stopThread = false;
-    receivethread_ipaddr = addr;
-    receivethread_port =  port;
+-(id)init {
+    self = [super init];
+    return self;
+}
+
+-(void) start :(char *)addr :(int)port {
+    NSLog(@"receiveThread start entry");
+    running =  false;
+    stopThread = false;
+    ipaddr = addr;
+    port =  port;
     
-    receivethread_Thread = [[NSThread alloc] initWithTarget:self selector:@selector(rxThread:)  object:nil];
-    [receivethread_Thread start];
-    while (receivethread_running == false) {
+    thread = [[NSThread alloc] initWithTarget:self selector:@selector(rxThread:)  object:nil];
+    [thread start];
+    sleep(2);
+    // wait for thread to complete
+    while (running == true) {
         sleep(1);
     }
-    NSLog(@"start exit");
+    NSLog(@"receiveThread start exit");
 }
 
-+(void) stop {
-    receivethread_stopThread = true;
+-(void) stop {
+    stopThread = true;
 }
 
-+(void) rxThread:(id) param {
-    NSLog(@"rxThread entry");
-    receivethread_running = true;
+-(void) rxThread:(id) param {
+    NSLog(@"receiveThread rxThread entry");
+    running = true;
     void * buffer;
     int length;
     
-    while ( ! receivethread_stopThread) {
-        [self receivePacket:receivethread_ipaddr :&buffer :&length];
-        sleep(1);
+    //int sk = [self createSocket];
+    int sk = [self sendRequest:ipaddr];
+    [self setSocketTimeout:sk];
+    
+    if (sk >=0) {
+    
+        while ( ! stopThread) {
+            [self receivePacket :sk :&buffer :&length];
+            if (length > 0) {
+                char * datastart = strstr(buffer, "<LogLine>");
+                datastart += 9;
+                char * dataend = strstr(buffer, "</LogLine>");
+                *dataend = 0;
+                NSLog(@"%s", datastart);
+            }
+        }
+    
+        close(sk);
     }
-    NSLog(@"rxThread exit");
+    
+    running = false;
+    NSLog(@"receiveThread rxThread exit");
 }
 
-+(void) receivePacket :(char *) sendAddr :(void **) oBuffer :(int*) oLength {
-    int sk = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    
-    if (sk <= 0 ) {
-        NSLog(@"receivePacket socket failed %s", strerror(errno));
-        return;
-    }
-    
+-(void) setSocketTimeout:(int)sk {
     // set timeout to 2 seconds.
     struct timeval timeV;
     timeV.tv_sec = 2;
     timeV.tv_usec = 0;
     
     if (setsockopt(sk, SOL_SOCKET, SO_RCVTIMEO, &timeV, sizeof(timeV)) == -1) {
-        NSLog(@"Error: listenForPackets - setsockopt failed");
-        close(sk);
-        return;
+        NSLog(@"receiveThread createSocket - setsockopt failed %s", strerror(errno));
     }
-    
-    // bind the port
-    struct sockaddr_in sockaddr;
-    memset(&sockaddr, 0, sizeof(sockaddr));
-    
-    sockaddr.sin_len = sizeof(sockaddr);
-    sockaddr.sin_family = AF_INET;
-    sockaddr.sin_port = htons(8087);
-    inet_pton(AF_INET, sendAddr, &sockaddr.sin_addr);
-    
-    int status = bind(sk, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
-    if (status == -1) {
-        close(sk);
-        NSLog(@"Error: receivePacket - bind() failed. %s", strerror(errno));
-        return;
-    }
+
+}
+
+
+-(void) receivePacket :(int)sk :(void **) oBuffer :(int*) oLength {
     
     // receive
     struct sockaddr_in receiveSockaddr;
-    socklen_t receiveSockaddrLen = sizeof(receiveSockaddr);
+    socklen_t receiveSockaddrLen = 0;
+    memset(&receiveSockaddr, 0, sizeof(struct sockaddr_in));
     
-    size_t bufSize = 9216;
+    *oBuffer = nil;
+    *oLength = 0;
+    
+    size_t bufSize = 1024*100;
     void *buf = malloc(bufSize);
     ssize_t result = recvfrom(sk, buf, bufSize, 0, (struct sockaddr *)&receiveSockaddr, &receiveSockaddrLen);
 
     if (result > 0) {
-        NSLog(@"receivePacket received %zd bytes", result);
         *oBuffer = buf;
         *oLength = (int) result;
     } else {
+        if (result < 0) {
+            NSLog(@"receiveThread receivePacket recvfrom failed %d %s",errno, strerror(errno));
+        }
         free(buf);
+        stopThread = true;
     }
     
     return;
+}
+
+-(int) sendRequest :(char *) sendAddr {
+    NSLog(@"receiveThread sendReqest entry");
+    int sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sd <=0) {
+        NSLog(@"sendReqest socket open error exit %s", strerror(errno));
+        return -1;
+    }
+    
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof addr);
+    addr.sin_family = AF_INET;
+    inet_pton(AF_INET, (char *) sendAddr, &addr.sin_addr);
+    addr.sin_port = htons(8087);
+    
+    char * buffer = "<LogDebug    Version=\"1.0\"><LogType>system</LogType><LogMethod>start</LogMethod></LogDebug>";
+    int ret = (int) sendto(sd, buffer, strlen(buffer), 0 , (struct sockaddr *) &addr, sizeof addr);
+    if (ret <= 0) {
+        NSLog(@"receiveThread sendReqest sendto error exit %s", strerror(errno));
+    }
+    
+    return sd;
+    
+    //close(sd);
+    NSLog(@"receiveThread sendRequest exit");
 }
 
 @end
