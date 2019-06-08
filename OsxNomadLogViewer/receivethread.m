@@ -136,9 +136,6 @@
     }
     
     return sd;
-    
-    //close(sd);
-    NSLog(@"receiveThread sendRequest exit");
 }
 
 @end
